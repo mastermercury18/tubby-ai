@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reflection Output</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #F5EAED;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 1000vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        p, pre {
+            font-size: 16px;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .chat-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            height: 300px;
+            margin-top: 20px;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 75%;
+        }
+        .message.user {
+            background-color: #6200EE;
+            color: white;
+            align-self: flex-end;
+        }
+        .message.bot {
+            background-color: #f1f1f1;
+            color: black;
+            align-self: flex-start;
+        }
+        .chat-input {
+            display: flex;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .chat-input button {
+            background-color: #6200EE;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .chat-input button:hover {
+            background-color: #3700B3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1># Meal Plan</h1>
+        <p>Review your personalized meal plan below.</p>
+        <pre id="previous-output">{{ output }}</pre>
+        <div class="chat-container" style="padding-right: 0px;">
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input">
+                <input type="text" id="user-input" placeholder="Type a message...">
+                <button type="button" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const chatMessages = document.getElementById('chat-messages');
+        const previousOutput = document.getElementById('previous-output');
+        const textInstructions = document.getElementById('input-instructions');
+
+        let conversationHistory = [];
+
+        async function processLine({ text }) {
+            if (text) {
+                appendMessage('bot', text);
+            }
+        }
+
+        async function fetchAndProcess(url, data) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            console.log('b');
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let { value: chunk, done: readerDone } = await reader.read();
+            let buffer = '';
+
+            while (!readerDone) {
+                buffer += decoder.decode(chunk, { stream: true });
+
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // Keep the last partial line for the next chunk
+
+                for (const line of lines) {
+                    if (line.trim()) {
+                        try {
+                            console.log(line);
+                            const parsed = JSON.parse(line);
+                            await processLine(parsed);
+                        } catch (e) {
+                            console.error("Failed to parse line", line, e);
+                        }
+                    }
+                }
+
+                ({ value: chunk, done: readerDone } = await reader.read());
+            }
+
+            if (buffer.trim()) {
+                try {
+                    const parsed = JSON.parse(buffer);
+                    await processLine(parsed);
+                } catch (e) {
+                    console.error("Failed to parse buffer", buffer, e);
+                }
+            }
+        }
+
+        function sendMessage() {
+            const userInput = document.getElementById('user-input');
+            const message = userInput.value.trim();
+            if (message) {
+                appendMessage('user', message);
+                userInput.value = '';
+                conversationHistory.push({ role: 'user', content: message });
+
+                console.log('a');
+
+                fetchAndProcess('/chatbot', {
+                    conversation_history: conversationHistory, 
+                    previous_output: previousOutput.textContent, 
+                    input_instructions: textInstructions.textContent, 
+                    message
+                }).catch(console.error);
+            }
+        }
+
+        function appendMessage(sender, message) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender);
+            messageElement.textContent = message;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html>
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reflection Output</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #F5EAED;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            box-sizing: border-box;
+            overflow-wrap: break-word;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        p, pre {
+            font-size: 16px;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .chat-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            height: 300px;
+            margin-top: 20px;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            animation: type 4s steps(60, end); 
+        }
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 75%;
+        }
+        .message.user {
+            background-color: #6200EE;
+            color: white;
+            align-self: flex-end;
+        }
+        .message.bot {
+            background-color: #f1f1f1;
+            color: black;
+            align-self: flex-start;
+        }
+        .chat-input {
+            display: flex;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .chat-input button {
+            background-color: #6200EE;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .chat-input button:hover {
+            background-color: #3700B3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1># Student Reflection - Restorative Practices</h1>
+        <p><strong>## Directions:</strong></p>
+        <p>Reflect on your behavior by answering the following questions with as much detail as possible and in complete sentences.</p>
+        <p><strong>## Questions:</strong></p>
+        <pre id="previous-output">{{ output }}</pre>
+        <pre id="input-instructions">{{ text }}</pre>
+        <div class="chat-container" style="padding-right: 0px;">
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input">
+                <input type="text" id="user-input" placeholder="Type a message...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+      <script>
+        const chatMessages = document.getElementById('chat-messages');
+    const previousOutput = document.getElementById('previous-output');
+    const textInstructions = document.getElementById('input-instructions')
+
+    let conversationHistory = [];
+
+    function sendMessage() {
+        const userInput = document.getElementById('user-input');
+        const message = userInput.value.trim();
+        if (message) {
+            appendMessage('user', message);
+            userInput.value = '';
+            conversationHistory.push({ role: 'user', content: message })
+            fetch("/chatbot", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message, previous_output: previousOutput.textContent, input_instructions: textInstructions.textContent })
+            })
+            .then(response => response.text())
+            .then(text => {
+                try {
+                    const data = JSON.parse(text);
+                    console.log("JSON Response from server:", data); // Debugging line
+                    if (typeof data === 'string') {
+                        appendMessage('bot', data);
+                    } else {
+                        appendMessage('bot', "Error: Invalid JSON response format");
+                    }
+                } catch (e) {
+                    console.log("Plain Text Response from server:", text); // Debugging line
+                    appendMessage('bot', text);
+                }
+                conversationHistory.push({ role: 'bot', content: text });
+            })
+            .catch(error => {
+                console.error("Fetch error:", error); // Debugging line
+                appendMessage('bot', `Error: Unable to get response - ${error.message}`);
+            });
+        }
+    }
+        function appendMessage(sender, message) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender);
+            messageElement.textContent = message;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+
+</body>
+</html> -->

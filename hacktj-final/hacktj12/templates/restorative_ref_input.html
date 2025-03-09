@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Plans</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #F5EAED;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header a {
+            text-decoration: none;
+            color: #6200EE;
+            font-size: 14px;
+        }
+        .header a:hover {
+            text-decoration: underline;
+        }
+        h1 {
+            font-size: 20px;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        p {
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #666;
+        }
+        label {
+            font-size: 14px;
+            margin-bottom: 5px;
+            display: block;
+        }
+        select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+        textarea {
+            height: 100px;
+            resize: none;
+        }
+        button {
+            background-color: #6200EE;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #3700B3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="#">Clear Inputs</a>
+            <a href="#">Exemplar</a>
+        </div>
+        <h1>Meal Plan</h1>
+        <p>Create a personalized meal-plan.</p>
+        <form action="/meal_plan_submit" method="post">
+
+            <label for="diabetes">Risk of Diabetes:</label>
+            <select id="diabetes" name="diabetes">
+                <option value="Low">Low Risk</option>
+                <option value="Medium">Medium Risk</option>
+                <option value="High">High Risk</option>
+            </select>
+
+            <label for="lactose">Lacose Intolerance:</label>
+            <select id="lactose" name="lactose">
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+
+            <label for="calcium">Calcium Level:</label>
+            <select id="calcium" name="calcium">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+            </select>
+
+            <label for="ethnicity">Ethnicity (Optional):</label>
+            <select id="ethnicity" name="ethnicity">
+                <option value="indian">Indian</option>
+                <option value="chinese">Chinese</option>
+                <option value="mexican">Mexican</option>
+                <option value="mongolian">Mongolian</option>
+                <option value="nigerian">Nigerian</option>
+                <option value="japanese">Japanese</option>
+                <option value="korean">Korean</option>
+                <option value="english">English</option>
+                <option value="russian">Russian</option>
+            </select>
+
+            <label for="special">Special Recommendations (Option):</label>
+            <textarea id="special" name="special" placeholder="Enter any allergies or special requests here."></textarea>
+
+            <button type="submit">Generate</button>
+        </form>
+    </div>
+</body>
+</html>
